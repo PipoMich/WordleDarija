@@ -107,17 +107,36 @@ function Hero() {
   }, [keyboardStatus]);
 
   const checkGuess = useCallback(
-    (guess) => {
-      return guess.split("").map((char, i) =>
-        char === targetWord[i]
-          ? "correct"
-          : targetWord.includes(char)
-          ? "present"
-          : "absent"
-      );
-    },
-    [targetWord]
-  );
+  (guess) => {
+    const result = Array(5).fill("absent");
+    const targetArr = targetWord.split("");
+    const guessArr = guess.split("");
+    const usedTargetLetters = Array(5).fill(false);
+
+    // First pass: correct letters
+    for (let i = 0; i < 5; i++) {
+      if (guessArr[i] === targetArr[i]) {
+        result[i] = "correct";
+        usedTargetLetters[i] = true;
+      }
+    }
+
+    // Second pass: present letters
+    for (let i = 0; i < 5; i++) {
+      if (result[i] === "correct") continue;
+      for (let j = 0; j < 5; j++) {
+        if (!usedTargetLetters[j] && guessArr[i] === targetArr[j]) {
+          result[i] = "present";
+          usedTargetLetters[j] = true;
+          break;
+        }
+      }
+    }
+
+    return result;
+  },
+  [targetWord]
+);
 
   const submitGuess = useCallback(() => {
     if (gameState !== GAME_STATES.PLAYING || currentGuess.length !== 5) {
